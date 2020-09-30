@@ -1,25 +1,16 @@
 package pl.training.shop.payments;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.transaction.annotation.Transactional;
-import pl.training.shop.common.profiler.ExecutionTime;
 
 import java.time.Instant;
 
-@Transactional
 @Log
-@RequiredArgsConstructor
-public class FakePaymentService implements PaymentService {
+public class FakePaymentService {
 
-    private final PaymentIdGenerator paymentIdGenerator;
-    private final PaymentRepository paymentRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private static final String LOG_FORMAT = "A new payment of %s has been initiated";
 
-    @ExecutionTime
-    @LogPayments
-    @Override
+    private final UUIDPaymentIdGenerator paymentIdGenerator = new UUIDPaymentIdGenerator();
+
     public Payment process(PaymentRequest paymentRequest) {
         var payment = Payment.builder()
                 .id(paymentIdGenerator.getNext())
@@ -27,8 +18,12 @@ public class FakePaymentService implements PaymentService {
                 .timestamp(Instant.now())
                 .status(PaymentStatus.STARTED)
                 .build();
-        eventPublisher.publishEvent(new PaymentStatusChangedEvent(this, payment));
-        return paymentRepository.save(payment);
+        log.info(createLogEntry(payment));
+        return payment;
+    }
+
+    private String createLogEntry(Payment payment) {
+        return String.format(LOG_FORMAT, payment.getMoney());
     }
 
 }

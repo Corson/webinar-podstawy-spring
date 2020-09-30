@@ -2,10 +2,8 @@ package pl.training.shop.payments;
 
 import java.util.UUID;
 
-@IdGenerator("uuid")
-public class UUIDPaymentIdGenerator implements PaymentIdGenerator {
+public class UUIDPaymentIdGenerator {
 
-    @Override
     public String getNext() {
         return UUID.randomUUID().toString();
     }
